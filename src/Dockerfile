@@ -1,14 +1,13 @@
-# Use an official Java runtime as base image
-FROM openjdk:17-jdk-alpine
-
-# Set working directory
+# Start with a Maven image to build the app
+FROM maven:3.8.4-openjdk-17-slim AS builder
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Copy the built jar to the container
-COPY target/*.jar app.jar
+# Now use a lightweight JDK image to run the app
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
 
-# Expose port 8080
-EXPOSE 8080
-
-# Run the jar file
-ENTRYPOINT ["java","-jar","app.jar"]
+# Run the app
+CMD ["java", "-jar", "app.jar"]
