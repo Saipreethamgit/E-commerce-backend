@@ -18,21 +18,40 @@ public class CartController {
         this.cartRepo = cartRepo;
     }
 
-    @GetMapping("/{userId}")
-    public List<CartItem> getCartItems(@PathVariable String userId) {
-        return cartRepo.findByUserId(userId);
+   @GetMapping
+public List<CartItem> getCartItems(Authentication authentication) {
+    String username = authentication.getName();
+    User user = userRepository.findByUsername(username);
+    return cartRepo.findByUserId(user.getId());
+}
+   @PostMapping
+public CartItem addOrUpdateCartItem(@RequestBody CartItem item, Authentication authentication) {
+    String username = authentication.getName();
+    User user = userRepository.findByUsername(username);
+    item.setUserId(user.getId());
+    if (item.getProductId() == null || item.getUserId() == null) {
+        throw new IllegalArgumentException("Product ID and User ID are required");
     }
 
-    @PostMapping
-    public CartItem addOrUpdateCartItem(@RequestBody CartItem item) {
-        CartItem existing = cartRepo.findByUserIdAndProductId(item.getUserId(), item.getProductId());
-        if (existing != null) {
-            existing.setQuantity(item.getQuantity());
-            return cartRepo.save(existing);
-        } else {
-            return cartRepo.save(item);
+    // Ensure IDs are stored as strings
+    String productId = item.getProductId().trim();
+    String userId = item.getUserId().trim();
+
+    CartItem existing = cartRepo.findByUserIdAndProductId(userId, productId);
+
+    if (existing != null) {
+        existing.setQuantity(existing.getQuantity() + item.getQuantity());
+        return cartRepo.save(existing);
+    } else {
+        if (item.getQuantity() <= 0) {
+            item.setQuantity(1);
         }
+        item.setUserId(userId);
+        item.setProductId(productId);
+        return cartRepo.save(item);
     }
+}
+
 
     @DeleteMapping("/{userId}/{productId}")
     public void removeItem(@PathVariable String userId, @PathVariable String productId) {
