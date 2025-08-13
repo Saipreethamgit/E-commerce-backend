@@ -1,8 +1,10 @@
 package com.gamercein.backend.controller;
 
 import com.gamercein.backend.model.CartItem;
+import com.gamercein.backend.model.User;
 import com.gamercein.backend.repository.CartItemRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.gamercein.backend.repository.UserRepository;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,48 +15,51 @@ import java.util.List;
 public class CartController {
 
     private final CartItemRepository cartRepo;
+    private final UserRepository userRepository;
 
-    public CartController(CartItemRepository cartRepo) {
+    public CartController(CartItemRepository cartRepo, UserRepository userRepository) {
         this.cartRepo = cartRepo;
+        this.userRepository = userRepository;
     }
 
-   @GetMapping
-public List<CartItem> getCartItems(Authentication authentication) {
-    String username = authentication.getName();
-    User user = userRepository.findByUsername(username);
-    return cartRepo.findByUserId(user.getId());
-}
-   @PostMapping
-public CartItem addOrUpdateCartItem(@RequestBody CartItem item, Authentication authentication) {
-    String username = authentication.getName();
-    User user = userRepository.findByUsername(username);
-    item.setUserId(user.getId());
-    if (item.getProductId() == null || item.getUserId() == null) {
-        throw new IllegalArgumentException("Product ID and User ID are required");
+    @GetMapping
+    public List<CartItem> getCartItems(Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return cartRepo.findByUserId(user.getId());
     }
 
-    // Ensure IDs are stored as strings
-    String productId = item.getProductId().trim();
-    String userId = item.getUserId().trim();
+    @PostMapping
+    public CartItem addOrUpdateCartItem(@RequestBody CartItem item, Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-    CartItem existing = cartRepo.findByUserIdAndProductId(userId, productId);
+        String productId = item.getProductId().trim();
+        String userId = user.getId().trim();
 
-    if (existing != null) {
-        existing.setQuantity(existing.getQuantity() + item.getQuantity());
-        return cartRepo.save(existing);
-    } else {
-        if (item.getQuantity() <= 0) {
-            item.setQuantity(1);
+        CartItem existing = cartRepo.findByUserIdAndProductId(userId, productId);
+
+        if (existing != null) {
+            existing.setQuantity(existing.getQuantity() + item.getQuantity());
+            return cartRepo.save(existing);
+        } else {
+            if (item.getQuantity() <= 0) {
+                item.setQuantity(1);
+            }
+            item.setUserId(userId);
+            item.setProductId(productId);
+            return cartRepo.save(item);
         }
-        item.setUserId(userId);
-        item.setProductId(productId);
-        return cartRepo.save(item);
     }
-}
 
+    @DeleteMapping("/{productId}")
+    public void removeItem(@PathVariable String productId, Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-    @DeleteMapping("/{userId}/{productId}")
-    public void removeItem(@PathVariable String userId, @PathVariable String productId) {
-        cartRepo.deleteByUserIdAndProductId(userId, productId);
+        cartRepo.deleteByUserIdAndProductId(user.getId(), productId);
     }
 }
