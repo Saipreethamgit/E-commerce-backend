@@ -2,29 +2,32 @@ package com.gamercein.backend.security;
 
 import com.gamercein.backend.model.User;
 import com.gamercein.backend.repository.UserRepository;
-import org.springframework.security.core.userdetails.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import java.util.Collections;
+
+import java.util.ArrayList; // ✅ import
+import java.util.Optional;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository users;
+    private final UserRepository userRepository; // ✅ field
 
-    public CustomUserDetailsService(UserRepository users) {
-        this.users = users;
+    public CustomUserDetailsService(UserRepository userRepository) { // ✅ constructor injection
+        this.userRepository = userRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User u = users.findByUsername(username);
-        if (u == null) {
-            throw new UsernameNotFoundException("User not found");
-        }
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
         return new org.springframework.security.core.userdetails.User(
-                u.getUsername(),
-                u.getPassword(),
-                Collections.emptyList()
+                user.getUsername(),
+                user.getPassword(),
+                new ArrayList<>() // ✅ fix ArrayList error
         );
     }
 }
