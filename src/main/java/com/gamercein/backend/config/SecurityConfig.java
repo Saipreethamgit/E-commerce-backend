@@ -23,9 +23,11 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
         .csrf(csrf -> csrf.disable())
         .cors(cors -> cors.disable())
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/auth/**").permitAll() // allow register/login
+            .requestMatchers("/", "/api/auth/**", "/api/products/**").permitAll()
             .anyRequest().authenticated()
         );
+
     return http.build();
 }
+
 }
