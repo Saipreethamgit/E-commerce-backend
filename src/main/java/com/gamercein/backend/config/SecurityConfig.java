@@ -18,19 +18,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-          .csrf().disable()
-          .cors().and()
-          .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-          .and()
-          .authorizeHttpRequests(auth -> auth
-              .requestMatchers("/api/auth/**").permitAll()
-              .requestMatchers("/api/products/**").permitAll()  // keep product listing public
-              .anyRequest().authenticated()
-          );
-
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
+        .cors(cors -> cors.disable())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/auth/**").permitAll() // allow register/login
+            .anyRequest().authenticated()
+        );
+    return http.build();
 }
