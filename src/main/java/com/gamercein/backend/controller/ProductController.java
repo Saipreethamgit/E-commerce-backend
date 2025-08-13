@@ -10,6 +10,7 @@ import com.gamercein.backend.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import jakarta.annotation.PostConstruct;
 
 
 import java.util.List;
@@ -31,15 +32,23 @@ public class ProductController {
         return productRepository.findAll();
     }
 
+    // Get product by ID
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable String id) {
         return productRepository.findById(id)
-                .map(product -> new ResponseEntity<>(product, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public Product createProduct(@RequestBody Product product) {
         return productRepository.save(product);
     }
+
+    @PostConstruct
+public void init() {
+    List<Product> products = productRepository.findAll();
+    System.out.println("Products loaded from DB: " + products);
+}
+
 }
