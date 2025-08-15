@@ -56,6 +56,7 @@ public class ProductController {
     // Debug: Check DB connection
     @PostConstruct
     public void init() {
+        System.out.println("Connected DB: " + productRepository.getClass());
         List<Product> products = productRepository.findAll();
         System.out.println("Products loaded from DB: " + products);
     }
