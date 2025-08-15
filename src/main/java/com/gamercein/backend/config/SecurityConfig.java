@@ -16,7 +16,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.disable())
+            .cors(cors -> {}) // ✅ enable CORS, use configuration from WebConfig
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/api/auth/**", "/api/products/**").permitAll()
                 .anyRequest().authenticated()
@@ -29,5 +29,9 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-}
 
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
