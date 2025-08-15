@@ -15,11 +15,12 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-    "http://localhost:3000", 
-    "*"
-)
-  // your React app URL
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+                            "http://localhost:3000",  
+                            "https://e-commerce-frontend-q6t5.vercel.app/
+" 
+                        )
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowCredentials(true); // ✅ Required for Authorization headers / cookies
             }
         };
     }
