@@ -18,18 +18,24 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin(origins = {"http://localhost:3000", "https://e-commerce-frontend-q6t5.vercel.app/products"}) // Allow frontend to access this API
+@CrossOrigin(origins = "*") // Allows all origins
 public class ProductController {
 
     private final ProductRepository productRepository;
 
+    @Autowired
     public ProductController(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
+    // Get all products
     @GetMapping
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public ResponseEntity<List<Product>> getAllProducts() {
+        List<Product> products = productRepository.findAll();
+        if (products.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(products);
     }
 
     // Get product by ID
@@ -40,15 +46,17 @@ public class ProductController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // Create new product
     @PostMapping
-    public Product createProduct(@RequestBody Product product) {
-        return productRepository.save(product);
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        Product savedProduct = productRepository.save(product);
+        return ResponseEntity.status(201).body(savedProduct);
     }
 
+    // Debug: Check DB connection
     @PostConstruct
-public void init() {
-    List<Product> products = productRepository.findAll();
-    System.out.println("Products loaded from DB: " + products);
-}
-
+    public void init() {
+        List<Product> products = productRepository.findAll();
+        System.out.println("Products loaded from DB: " + products);
+    }
 }
