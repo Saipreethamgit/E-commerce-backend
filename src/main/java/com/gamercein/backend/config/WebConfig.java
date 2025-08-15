@@ -15,12 +15,11 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                            "http://localhost:3000",  
-                            "https://e-commerce-frontend-q6t5.vercel.app/
-" 
+                            "http://localhost:3000",            // Local React
+                            "https://your-frontend-domain.com" // Replace with deployed React URL
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowCredentials(true); // ✅ Required for Authorization headers / cookies
+                        .allowCredentials(true); // Required for Authorization headers / cookies
             }
         };
     }
