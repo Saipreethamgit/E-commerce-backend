@@ -16,7 +16,7 @@ public class WebConfig {
                 registry.addMapping("/**")
                         .allowedOrigins(
                             "http://localhost:3000",        
-                            "https://e-commerce-frontend-q6t5.vercel.app/" 
+                            "https://e-commerce-frontend-q6t5.vercel.app" 
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowCredentials(true); // Required for Authorization headers / cookies
