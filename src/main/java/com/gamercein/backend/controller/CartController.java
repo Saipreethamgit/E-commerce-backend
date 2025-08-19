@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/cart")
-@CrossOrigin(origins = "*") // adjust if needed
+@CrossOrigin(origins = {"http://localhost:3000", "https://e-commerce-frontend-q6t5.vercel.app"}) // adjust if needed
 public class CartController {
 
     private final CartItemRepository cartRepo;
