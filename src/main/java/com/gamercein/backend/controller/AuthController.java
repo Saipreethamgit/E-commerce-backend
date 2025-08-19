@@ -3,11 +3,14 @@ package com.gamercein.backend.controller;
 import com.gamercein.backend.model.User;
 import com.gamercein.backend.repository.UserRepository;
 import com.gamercein.backend.security.JwtUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,36 +27,38 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-public ResponseEntity<?> registerUser(@RequestBody User user) {
-    if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-        return ResponseEntity.badRequest().body("Email already exists");
-    }
-
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
-    userRepository.save(user);
-
-    return ResponseEntity.ok("User registered successfully!");
-}
-
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        String email = body.get("email"); // now using email
-        String password = body.get("password");
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            return ResponseEntity.badRequest().body("❌ Email already exists");
+        }
+        if (userRepository.existsByUsername(user.getUsername())) {
+            return ResponseEntity.badRequest().body("❌ Username already exists");
         }
 
-        String token = jwtUtil.generateToken(user.getUsername());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
 
-        return ResponseEntity.ok(Map.of(
-                "token", token,
-                "username", user.getUsername(),
-                "userId", user.getId()
-        ));
+        return ResponseEntity.ok("✅ User registered successfully!");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
+        Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+                String token = jwtUtil.generateToken(user.getEmail());
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("token", token);
+                response.put("userId", user.getId());
+                response.put("username", user.getUsername());
+
+                return ResponseEntity.ok(response);
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("❌ Invalid credentials");
     }
 }
