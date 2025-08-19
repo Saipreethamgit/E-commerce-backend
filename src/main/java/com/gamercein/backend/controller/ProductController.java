@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin(origins = "*") // Allow frontend to access this API
+@CrossOrigin(origins = {"http://localhost:3000", "https://e-commerce-frontend-q6t5.vercel.app"}) // Allow frontend to access this API
 public class ProductController {
 
     private final ProductRepository productRepository;
