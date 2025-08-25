@@ -1,7 +1,7 @@
 package com.gamercein.backend.security;
 
 import com.gamercein.backend.security.JwtUtil;
-import com.gamercein.backend.service.CustomUserDetailsService;
+import com.gamercein.backend.security.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
