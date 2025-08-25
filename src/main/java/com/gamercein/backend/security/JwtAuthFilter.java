@@ -1,6 +1,6 @@
-package com.gamercein.backend.config;
+package com.gamercein.backend.security;
 
-import com.gamercein.backend.service.JwtService;
+import com.gamercein.backend.security.JwtUtil;
 import com.gamercein.backend.service.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
