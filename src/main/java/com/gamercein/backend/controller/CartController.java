@@ -27,12 +27,29 @@ public class CartController {
     }
 
     @GetMapping
-    public List<CartItem> getCartItems(Authentication authentication) {
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return cartRepo.findByUserId(user.getId());
-    }
+public List<Map<String, Object>> getCartItems(Authentication authentication) {
+    String username = authentication.getName();
+    User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    List<CartItem> cartItems = cartRepo.findByUserId(user.getId());
+
+    return cartItems.stream().map(item -> {
+        Map<String, Object> response = new HashMap<>();
+        response.put("productId", item.getProductId());
+        response.put("quantity", item.getQuantity());
+        
+        // fetch product details
+        Product product = productRepository.findById(item.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        response.put("name", product.getName());
+        response.put("price", product.getPrice());
+        response.put("imageUrl", product.getImageUrl());
+
+        return response;
+    }).collect(Collectors.toList());
+}
+
 
     @PostMapping
 public List<CartItem> addOrUpdateCartItem(@RequestBody CartItem item, Authentication authentication) {
