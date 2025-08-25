@@ -52,7 +52,7 @@ public class CartController {
                     .orElseThrow(() -> new RuntimeException("Product not found"));
             response.put("name", product.getName());
             response.put("price", product.getPrice());
-            response.put("imageUrl", product.getImageUrl());
+            response.put("imageUrl", product.getImage());
 
             return response;
         }).collect(Collectors.toList());
